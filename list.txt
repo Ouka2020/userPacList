@@ -1,0 +1,11 @@
+"||romcenter.com",
+"||mameui.info",
+"||emulab.it",
+"||planetemu.net",
+"||emuunlim.com",
+"||emu-france.com",
+"||imperceptiblethoughts.com",
+"||githubusercontent.com",
+"||netsarang.com",
+"||repository.aspose.com",
+"||emeditor.blob.core.windows.net"
