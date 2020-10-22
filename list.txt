@@ -12,4 +12,5 @@
 ||netsarang.com,
 ||github-production-release-asset-2e65be.s3.amazonaws.com,
 ||download.tortoisegit.org,
-||github.com
+||github.com,
+||www.gyan.dev
