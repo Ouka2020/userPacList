@@ -11,6 +11,12 @@
 ||emeditor.blob.core.windows.net,
 ||netsarang.com,
 ||github-production-release-asset-2e65be.s3.amazonaws.com,
+||download.anydesk.com,
+||files.gpg4win.org,
 ||download.tortoisegit.org,
 ||github.com,
-||www.gyan.dev
+||www.gyan.dev,
+||www.jetbrains.com,
+||intellij-support.jetbrains.com,
+||plugins.jetbrains.com,
+||digi.bib.uni-mannheim.de
