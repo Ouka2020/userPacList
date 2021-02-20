@@ -5,8 +5,9 @@ name = "pypi"
 
 [packages]
 aiohttp = "*"
-requests = "*"
+aiodns = "*"
 logbook = "*"
+aiofile = "*"
 
 [dev-packages]
 
