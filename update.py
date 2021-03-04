@@ -1,76 +1,85 @@
 import asyncio
-from typing import List
-
-import aiohttp
-import requests
 import base64
-import urllib3
-import logbook.more
 import re
 
-gfw_list_url = r"https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt"
+import aiofile
+import aiohttp
+from typing import List
+
+import logbook.more
+
+# 清单地址
+GFW_LIST_URL = r"https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt"
+
+# logger
 logger = logbook.Logger()
+
+# aiodns 临时方案
+asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+# re
+comment_re = re.compile(r'^!.*$')
+title_re = re.compile(r'\[AutoProxy.+]$')
+end_of_file_re = re.compile(r'!#+General\sList\sEnd#+$')
+empty_line_re = re.compile(r'^$')
+
+
+async def get_remote_gfwlist_file_async(save_filename: str):
+    resolver = aiohttp.resolver.AsyncResolver(nameservers=["8.8.8.8", "8.8.4.4"])
+    conn = aiohttp.TCPConnector(resolver=resolver)
+
+    async with aiohttp.ClientSession(connector=conn) as session:
+        async with session.get(GFW_LIST_URL) as response:
+            txt = await response.content.read()
+
+    result = base64.decodebytes(txt).decode('utf-8')
+    async with aiofile.async_open(save_filename, 'w') as f:
+        await f.write(result)
+
+
+async def get_pac_items_async(*args: str) -> List[str]:
+    pac_list: List[str] = []
+    final_pac_list: List[str] = []
+
+    for filename in args:
+        await __process_file_async(pac_list, filename)
+
+    # 去重
+    [final_pac_list.append(i) for i in pac_list if i not in final_pac_list]
+
+    # 排序
+    final_pac_list.sort()
+    return final_pac_list
+
+
+async def __process_file_async(items: List[str], name: str):
+    async with aiofile.async_open(name, 'r') as f:
+        while line := await f.readline():
+            if end_of_file_re.match(line):
+                logger.debug('end of file.')
+                break
+            elif title_re.match(line) or comment_re.match(line) or empty_line_re.match(line):
+                logger.debug('title_re or comment_re skipped.')
+            else:
+                items.append(line[:-1])
+
+
+async def build_gfwlist(filename: str, pac_items: List[str]):
+    async with aiofile.async_open(filename, 'w') as f2:
+        await f2.write(base64.encodebytes('\n'.join(pac_items).encode('utf-8')).decode('utf-8'))
 
 
 async def main():
-    async with aiohttp.ClientSession() as session:
-        async with session.get(gfw_list_url, proxy='http://localhost:1091') as response:
-            txt = await response.text()
+    await get_remote_gfwlist_file_async(r'gfwlist.txt')
+    result = await get_pac_items_async(r'gfwlist.txt', r'extralist.txt')
+    await build_gfwlist(r'gfwlist.base64.txt', result)
 
-    print(txt)
-
-
-def get_remote_gfwlist():
-    urllib3.disable_warnings()
-    resp = requests.get(gfw_list_url, proxies={'http': 'socks5://localhost:1090'}, verify=False)
-    txt = resp.text
-
-    result = base64.b64decode(txt).decode('utf-8')
-    with open(r'gfwlist.txt', 'w') as f:
-        f.write(result)
-
-
-def process_file(filename: str) -> List[str]:
-    comment = re.compile(r'^!.*$')
-    title = re.compile(r'\[AutoProxy.+]$')
-    end_of_file = re.compile(r'!#+General\sList\sEnd#+$')
-    kong = re.compile(r'^$')
-
-    pac_list = []
-    with open(filename, 'r') as f:
-        while line := f.readline():
-            if end_of_file.match(line):
-                logger.debug('end of file.')
-                break
-            elif title.match(line) or comment.match(line) or kong.match(line):
-                logger.debug('title or comment skipped.')
-            else:
-                pac_list.append(line[:-1])
-
-    # pac_list.sort()
-    return pac_list
-    # print(','.join(pac_list))
-
-
-def fixed(a_list):
-    new_list = []
-    [new_list.append(i) for i in a_list if i not in new_list]
-    return new_list
+    # test
+    # async with aiofile.async_open(r'gfwlist2.base64.txt', 'r') as f3:
+    #     txt: str = await f3.read()
+    # print(base64.decodebytes(txt.encode('utf-8')).decode('utf-8'))
 
 
 if __name__ == '__main__':
     logbook.more.ColorizedStderrHandler(level=logbook.INFO).push_application()
-    # asyncio.run(main())
-    get_remote_gfwlist()
-    full_list = process_file(r'gfwlist.txt')
-    full_list.extend(process_file(r'extralist.txt'))
-    full_list = fixed(full_list)
-    full_list.sort()
-    # print(len(full_list))
-
-    with open(r'gfwlist.base64.txt', 'w') as f2:
-        f2.write(base64.b64encode('\n'.join(full_list).encode('utf-8')).decode('utf-8'))
-
-    # with open(r'gfwlist_ex.txt', 'r') as f3:
-    #     t = f3.read()
-    #     print(base64.b64decode(t).decode('utf-8'))
+    asyncio.run(main())
