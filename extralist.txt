@@ -21,3 +21,4 @@
 ||plugins.jetbrains.com
 ||digi.bib.uni-mannheim.de
 ||sourceforge.net
+||privoxy.org
