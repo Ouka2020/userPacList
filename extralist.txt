@@ -22,3 +22,5 @@
 ||privoxy.org
 ||filezilla-project.org
 ||apachehaus.com
+||vsassets.io
+||apachehaus.com
