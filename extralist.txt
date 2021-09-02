@@ -16,8 +16,6 @@
 ||download.tortoisegit.org
 ||github.com
 ||www.gyan.dev
-||www.jetbrains.com
-||plguins.jetbrains.com
 ||digi.bib.uni-mannheim.de
 ||sourceforge.net
 ||privoxy.org
