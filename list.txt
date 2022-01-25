@@ -15,6 +15,7 @@
 ||files.gpg4win.org,
 ||download.tortoisegit.org,
 ||github.com,
+||github.io,
 ||www.gyan.dev,
 ||www.jetbrains.com,
 ||intellij-support.jetbrains.com,

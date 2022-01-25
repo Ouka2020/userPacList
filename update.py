@@ -24,12 +24,12 @@ end_of_file_re = re.compile(r'!#+General\sList\sEnd#+$')
 empty_line_re = re.compile(r'^$')
 
 
-async def get_remote_gfwlist_file_async(save_filename: str):
+async def get_remote_gfwlist_file_async(save_filename: str, proxy: str):
     resolver = aiohttp.resolver.AsyncResolver(nameservers=["8.8.8.8", "8.8.4.4"])
     conn = aiohttp.TCPConnector(resolver=resolver)
 
     async with aiohttp.ClientSession(connector=conn) as session:
-        async with session.get(GFW_LIST_URL) as response:
+        async with session.get(GFW_LIST_URL, proxy=proxy) as response:
             txt = await response.content.read()
 
     result = base64.decodebytes(txt).decode('utf-8')
@@ -69,8 +69,8 @@ async def build_gfwlist(filename: str, pac_items: List[str]):
         await f2.write(base64.encodebytes('\n'.join(pac_items).encode('utf-8')).decode('utf-8'))
 
 
-async def main():
-    await get_remote_gfwlist_file_async(r'gfwlist.txt')
+async def main(proxy: str = None):
+    await get_remote_gfwlist_file_async(r'gfwlist.txt', proxy=proxy)
     result = await get_pac_items_async(r'gfwlist.txt', r'extralist.txt')
     await build_gfwlist(r'gfwlist.base64.txt', result)
 
@@ -82,4 +82,4 @@ async def main():
 
 if __name__ == '__main__':
     logbook.more.ColorizedStderrHandler(level=logbook.INFO).push_application()
-    asyncio.run(main())
+    asyncio.run(main(proxy="http://127.0.0.1:10809"))
