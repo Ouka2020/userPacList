@@ -82,4 +82,4 @@ async def main(proxy: str = None):
 
 if __name__ == '__main__':
     logbook.more.ColorizedStderrHandler(level=logbook.INFO).push_application()
-    asyncio.run(main(proxy="http://127.0.0.1:10809"))
+    asyncio.run(main(proxy="http://127.0.0.1:1081"))
